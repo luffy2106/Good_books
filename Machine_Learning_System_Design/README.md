@@ -306,4 +306,216 @@ Understanding and choosing the appropriate sampling method is crucial for creati
 
 
 ##### 4.2 Labelling
+The text discusses the challenges and methodologies associated with obtaining labeled data for machine learning (ML) models. Despite the promise of unsupervised ML, most models today rely on supervised learning, requiring high-quality labeled data for effective training. Key points include:
+
+**Importance of Labeled Data**:
+  - Performance of ML models depends on the quality and quantity of labeled data.
+  - Data labeling is now a core function of many ML teams.
+
+**Hand Labeling**:
+  - Expensive and time-consuming, especially when expertise is required (e.g., radiologists for medical data).
+  - Raises privacy concerns, as data must be shared with annotators.
+  - Slow process, leading to slower model adaptation to changes.
+
+**Label Multiplicity**:
+  - Different annotators often provide conflicting labels for the same data, causing label ambiguity.
+  - Clear problem definitions and consistent training for annotators can reduce disagreements.
+
+**Data Lineage**:
+  - Tracking the origin and quality of labeled data is crucial to avoid model performance issues when integrating new data.
+
+**Natural Labels**:
+  - Some tasks have natural ground truth labels inferred from system interactions (e.g., Google Maps ETA, stock price predictions, recommender systems).
+  - Feedback loop length varies; shorter loops allow quicker model adaptation, while longer loops are common in tasks like fraud detection.
+
+**Handling Lack of Labels**:
+  - **Weak Supervision**: Uses heuristics and labeling functions to generate noisy but useful labels. Tools like Snorkel aid this process.
+  - **Semi-Supervision**: Combines small amounts of labeled data with assumptions to generate more labels.
+  - **Transfer Learning**: Uses pretrained models as a starting point for new tasks, reducing the need for large amounts of labeled data.
+  - **Active Learning**: Focuses on labeling the most informative data samples to improve model efficiency with fewer labels.
+
+**Challenges and Strategies**:
+  - Addressing hand labeling issues involves cost, privacy, and speed considerations.
+  - Techniques like weak supervision, semi-supervision, transfer learning, and active learning help mitigate the lack of labeled data.
+  - Active learning is particularly promising for real-time data adaptation.
+
+Overall, the text emphasizes the critical role of data labeling in ML, the challenges faced in obtaining labeled data, and various strategies to overcome these challenges to improve model performance.
+
+
+##### 4.3 Class imbalance
+[to be continued ]
+
+
+
+#### 5. Feature engineering
+[to be continued ]
+
+#### 6. Model Development and Offline Evaluation
+[to be continued ]
+
+
+#### 7. Model Deployment and Prediction Service
+
+##### 7.1 Batch Prediction Versus Online Prediction
+The text provides an in-depth discussion on the differences and implications of using batch prediction versus online prediction in machine learning (ML) systems. Key points include:
+
+**Prediction Modes**:
+  - **Batch Prediction**: Generates predictions periodically or when triggered, storing them for future use. Known as asynchronous prediction.
+  - **Online Prediction**: Generates predictions in real-time as requests arrive, typically via RESTful APIs. Known as synchronous prediction.
+  - **Streaming Prediction**: A type of online prediction that uses both batch and streaming features.
+
+**Batch vs. Online Prediction**:
+  - **Batch Prediction**:
+    - Uses historical (batch) data.
+    - Suitable for scenarios where immediate results are not required (e.g., periodic movie recommendations).
+    - Optimized for high throughput but less responsive to real-time changes in user preferences.
+    - Can reduce inference latency for complex models by precomputing predictions.
+  - **Online Prediction**:
+    - Uses real-time (streaming) data and batch data.
+    - Necessary for applications requiring immediate results (e.g., fraud detection, autonomous vehicles).
+    - Optimized for low latency but traditionally considered less efficient in terms of cost and performance.
+
+**Terminology Confusion**:
+  - Terms like “online prediction” and “batch prediction” can be confusing. The text suggests using “synchronous prediction” and “asynchronous prediction” but acknowledges that even these terms are not perfect.
+
+**Use Cases**:
+  - **Batch Prediction**: Used for generating large volumes of predictions, such as recommendations for all users periodically.
+  - **Online Prediction**: Used for generating predictions on-demand, essential for applications like real-time language translation and high-frequency trading.
+
+**Hybrid Solutions**:
+  - Some systems precompute predictions for popular queries (batch prediction) and generate predictions online for less popular queries, combining the benefits of both approaches.
+
+**Transition from Batch to Online Prediction**:
+  - Online prediction is often the first approach used during prototyping due to its immediate feedback nature.
+  - Batch prediction can be a workaround for scenarios where online prediction is too slow or costly.
+  - As hardware and techniques improve, the trend is moving towards more online predictions.
+
+**Challenges and Infrastructure**:
+  - Building a unified pipeline for both batch and streaming data is complex but essential for reducing bugs and maintaining consistency.
+  - Companies are investing in stream processing frameworks and feature stores to achieve this unification.
+
+**Key Differences**:
+  - Batch prediction processes accumulated data periodically, useful for recommendations.
+  - Online prediction processes data as soon as it arrives, critical for real-time applications.
+
+##### 7.2 Model compression
+
+The text explores various techniques for reducing the inference latency of machine learning (ML) models, emphasizing model compression and optimization. Here are the key points:
+
+**Inference Optimization Approaches**:
+  - **Make inference faster**: Improve the efficiency of the inference process.
+  - **Make the model smaller**: Reduce the model size through compression techniques.
+  - **Improve hardware performance**: Use faster hardware for deploying the model.
+
+**Model Compression**:
+  - **Low-Rank Factorization**: Replaces high-dimensional tensors with lower-dimensional ones to reduce parameters and increase speed. Examples include compact convolutional filters and MobileNets.
+  - **Knowledge Distillation**: A smaller model (student) is trained to mimic a larger model (teacher), retaining much of the teacher's capabilities but with reduced size and faster inference. Example: DistilBERT.
+  - **Pruning**: Removes less important parameters from the model, making it sparser and more efficient without significantly compromising accuracy. This can involve setting certain parameters to zero or removing entire nodes.
+  - **Quantization**: Reduces the number of bits used to represent model parameters, thus decreasing memory usage and improving computation speed. Commonly involves using lower precision (e.g., 16-bit or 8-bit integers) instead of the default 32-bit floats.
+
+**Detailed Techniques**:
+  - **Low-Rank Factorization**: Used mainly for convolutional neural networks, it involves strategies like replacing 3x3 convolutions with 1x1 convolutions.
+  - **Knowledge Distillation**: Useful for deploying smaller models, it can work across different architectures but requires an existing larger model as a teacher.
+  - **Pruning**: Can significantly reduce the nonzero parameters of a neural network, making it more efficient.
+  - **Quantization**: General and widely used, it reduces the precision of model parameters, resulting in faster computations and reduced memory footprint. It can be applied during or after training.
+
+**Quantization Details**:
+  - **Half Precision (16-bit)**: Reduces memory usage by half compared to 32-bit.
+  - **Fixed Point (8-bit)**: Further reduces memory usage and improves speed. Binary weight neural networks represent an extreme case with 1-bit weights.
+  - **Trade-offs**: Lower precision can lead to rounding errors and under/overflow issues, which need careful handling.
+
+**Case Study - Roblox**:
+  - Roblox scaled BERT to handle over 1 billion daily requests on CPUs by implementing various compression techniques.
+  - They started with a large BERT model, then used DistilBERT and dynamic shape input, and finally quantized the model.
+  - Quantization provided the most significant performance boost, reducing latency sevenfold and increasing throughput eightfold.
+
+##### 7.3 ML on the Cloud and on the Edge
+
+The text discusses the considerations and trade-offs between deploying machine learning (ML) models on the cloud versus on edge devices. 
+
+### Key Points:
+
+**Cloud vs. Edge Computation**:
+  - **Cloud Computation**: Involves performing a large portion of computations on public or private cloud servers.
+  - **Edge Computation**: Involves performing computations on consumer devices (e.g., phones, laptops, cars, smartwatches).
+
+**Cloud Deployment**:
+  - **Ease of Use**: Managed cloud services (AWS, GCP) make it straightforward to deploy ML models.
+  - **Cost Concerns**: Cloud computations can be expensive. Large companies spend millions annually, and small/medium companies also incur significant costs. Mishandling cloud services can financially strain startups.
+
+**Edge Deployment**:
+  - **Cost Efficiency**: Reduces the amount of computation required on the cloud, thereby lowering costs.
+  - **Operational Benefits**:
+    - Works without internet or with unreliable connections, making it viable in remote areas or places with strict no-internet policies.
+    - Reduces network latency as computations occur locally on the device, improving real-time performance.
+  - **Privacy and Security**: Keeps user data on local devices, mitigating risks of data breaches and aiding compliance with data regulations (e.g., GDPR). However, physical device theft remains a risk.
+  - **Device Requirements**: Edge devices need sufficient computational power, memory, and battery life to handle ML models.
+
+**Trends and Developments**:
+  - **Rise of Edge Devices**: Companies are developing specialized hardware for ML use cases (e.g., Google, Apple, Tesla), and the number of active edge devices is projected to exceed 30 billion by 2025.
+  - **Optimization Challenges**: Running ML models efficiently on diverse hardware requires significant effort. Intermediate representations (IRs) and compilers help bridge frameworks and hardware platforms, simplifying this process.
+
+**Model Optimization**:
+  - **Compilers and IRs**: Translate high-level model code into machine code specific to hardware backends. This involves optimizing computation graphs for efficiency.
+  - **Techniques**: Include vectorization, parallelization, loop tiling, and operator fusion to enhance performance.
+  - **ML for Optimization**: Tools like autoTVM use ML to optimize models by predicting the best execution paths, though this process can be time-consuming.
+In the end, after optimizing model for specific type of GPU, you can have a model which is faster for the inference.
+
+**ML in Browsers**:
+  - **WebAssembly (WASM)**: Allows running ML models in browsers, making them hardware-agnostic. While WASM is faster than JavaScript, it is still slower than native applications.
+
+
+#### 8. Data distribution shifts and monitoring
+A company deployed an ML model to predict grocery demand, initially achieving good results. Over time, the model's accuracy declined, leading to inventory mismanagement.
+The company faced expensive options to update the model or build an in-house team. Lession leanned:
+- Deploying an ML model requires ongoing monitoring and updates to maintain performance.
+- Changes in data patterns over time can cause models to fail, highlighting the need for regular updates.
+
+##### 8.1. Causes of ML System Failures
+
+- Failure: Occurs when one or more system expectations are violated.
+- Operational Expectations: Similar to traditional software, focusing on metrics like latency and throughput.
+- ML Performance Expectations: Unique to ML systems, focusing on the accuracy and quality of predictions.
+
+**Types of Failures**
+- Software System Failures: 
+  - Dependency Failure: Breaks due to third-party dependencies.
+  - Deployment Failure: Errors during deployment, such as incorrect binaries or permissions issues.
+  - Hardware Failures: Failures due to malfunctioning hardware like CPUs or GPUs.
+  - Downtime or Crashing: System failures due to server downtimes.
+  - Predominantly non-ML related but essential for ML engineers to address using traditional software engineering skills.
+  - Example: Google’s ML pipeline failures often stemmed from distributed system or data pipeline issues.
+
+- ML-Specific Failures:
+  - Data Collection and Processing Problems: Issues arising from incorrect or inadequate data.
+  - Poor Hyperparameters: Suboptimal settings leading to poor model performance.
+  - Training-Inference Pipeline Discrepancies: Mismatches between training and inference environments.
+  - Data Distribution Shifts: Changes in data over time that the model was not trained to handle.
+  - Edge Cases: Rare, extreme cases that the model cannot handle well.
+  - Degenerate Feedback Loops: Situations where model outputs influence future inputs, leading to biased or suboptimal performance.
+
+#### Detailed ML-Specific Failures
+- Production Data Differing from Training Data:
+  - Generalization Issue: Training data might not represent the real-world data accurately.
+  - Real-World Data Variability: Real-world data can shift over time, making initial training data insufficient.
+  - Examples: Shifts due to events like COVID-19, seasonal changes, or internal errors like bugs in the data pipeline.
+
+- Edge Cases:
+  - High-Risk Scenarios: ML models failing in critical scenarios (e.g., self-driving cars, medical diagnosis).
+  - Outliers vs. Edge Cases: Outliers are data points significantly different from others, while edge cases are where the model performs poorly on a rare case, but it have big effect.
+
+- Degenerate Feedback Loops:
+  - Feedback Influence: When model predictions affect user interactions, which in turn affect future predictions.
+  - Common in Recommender Systems: Items getting more exposure due to initial high ranking, leading to popularity bias.
+  - Examples in recommeding ads: some ads keep showing ups in the website just because the AI thinks it's the most interesting for the users, and the users keep clicking it just because they don't see anything else show, which make the AI even more belive that its algorithm is correct.
+
+- Detecting and Correcting Degenerate Feedback Loops
+  - Detection: Measure diversity and popularity of system outputs; observe if predictions become homogeneous over time.
+  - Correction Methods:
+      - Randomization: Introducing randomness in predictions to reduce homogeneity.
+      - Positional Features: Using features that account for the position of an item in a recommendation list to mitigate bias.
+      - Two-Model Approach: Separate models for predicting visibility and interaction likelihood. First model to predict the probability that a user will see and consider an ad based on its position. The second model that predict the probability that a user will click on an ad given that they have seen and considered it.In the end, we rank the ads based on the combined probabilities from both models.
+
+##### 8.2. Data distribution shifts
+
 
