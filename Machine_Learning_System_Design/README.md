@@ -518,4 +518,83 @@ The company faced expensive options to update the model or build an in-house tea
 
 ##### 8.2. Data distribution shifts
 
+The text provides an in-depth analysis of data distribution shifts in supervised machine learning (ML) systems, which occur when the data a model is trained on differs from the data it encounters in production, causing a decline in predictive accuracy over time. It emphasizes the importance of understanding and addressing these shifts to maintain model performance.
+
+### Key Points:
+
+**Definition and Types of Data Distribution Shifts**:
+  - **Covariate Shift**: Change in the distribution of the input data (\(P(X)\)) while the relationship between inputs and outputs (\(P(Y|X)\)) remains the same.
+  - **Label Shift**: Change in the distribution of the output data (\(P(Y)\)) while the relationship between outputs and inputs (\(P(X|Y)\)) remains the same.
+  - **Concept Drift**: Change in the relationship between inputs and outputs (\(P(Y|X)\)) while the input distribution (\(P(X)\)) remains the same.
+
+**Causes and Examples**:
+  - Covariate shifts can arise from biases in data collection, changes in the environment, or artificial data alterations for model training.
+  - Label shifts often occur alongside covariate shifts but can happen independently, such as when a preventive measure changes disease incidence rates.
+  - Concept drift can result from significant events (e.g., COVID-19 affecting housing prices) or cyclic/seasonal variations.
+
+**Detection of Data Shifts**:
+  - Monitoring accuracy-related metrics in production is crucial but challenging due to the lack of real-time ground truth labels.
+  - Statistical methods and two-sample tests (e.g., Kolmogorov-Smirnov test) can help detect shifts by comparing training and production data distributions.
+  - Importance of time scale windows in detecting temporal shifts, with cumulative and sliding statistics aiding in monitoring.
+
+**Addressing Data Shifts**:
+  - Regular retraining of models using updated data to adapt to new distributions.
+  - Using massive datasets to train robust models that generalize well to new data.
+  - Advanced techniques like domain adaptation and transfer learning for model adjustment without extensive retraining.
+  - Designing systems to be more resilient to shifts by carefully selecting and managing features and employing separate models for different segments.
+
+**Practical Considerations**:
+  - Companies must balance model performance and feature stability to minimize frequent retraining.
+  - Addressing human errors and understanding the root causes of shifts are crucial steps before implementing ML solutions.
+  - The text underscores the complexity of managing data distribution shifts and the necessity of robust monitoring and adaptive strategies to maintain ML model performance in dynamic environments.
+
+##### 8.3. Monitoring and Observability
+
+This section provides a comprehensive overview of monitoring and observability for machine learning (ML) systems in production. It highlights the necessity of monitoring ML systems to ensure their proper functioning and differentiates between monitoring and observability:
+
+- **Monitoring** involves tracking, measuring, and logging various metrics to identify issues.
+- **Observability** refers to configuring a system to provide insights for investigating issues, often involving instrumentation like adding timers and logging unusual events. 
+
+Monitoring focuses on tracking predefined metrics and alerting when these metrics breach set thresholds, while observability is about gaining deep insights into the system's internal states by analyzing logs, metrics, and traces to diagnose and understand complex issues.
+Short Example:
+**Monitoring**
+- Scenario: Your e-commerce website tracks server CPU usage.
+- Action: An alert is set to notify you if CPU usage exceeds 80%.
+- Response: When the alert is triggered, you investigate and find that a high CPU process is running. You restart the process to bring the CPU usage back down.
+**Observability**
+- Scenario: Customers report that the website is slow during checkout.
+- Action: You use observability tools to trace requests, analyze logs, and check detailed metrics.
+- Insight: You discover that a new feature release caused database query latency due to inefficient indexing.
+- Response: You optimize the query and deploy the fix, improving the checkout performance.
+
+
+
+Key concepts include:
+
+**Operational Metrics**:
+- Essential for assessing the health of ML systems, these metrics include network latency, CPU/GPU utilization, memory usage, and system uptime.
+
+**ML-Specific Metrics**:
+  - Metrics related to model accuracy, predictions, features, and raw inputs.
+  - Accuracy metrics, derived from user feedback, are crucial for assessing model performance.
+  - Monitoring predictions helps detect distribution shifts and anomalies.
+  - Feature monitoring involves validating features against expected schemas and detecting distribution shifts, though it poses challenges like alert fatigue and complexity in processing.
+
+**Monitoring Raw Inputs**:
+  - Monitoring raw inputs before processing can help identify data-related issues, though it is often managed by data platform teams.
+
+**Monitoring Toolbox**:
+  - Tools used for monitoring include logs, dashboards, and alerts.
+  - Logs record runtime events, but managing them can be challenging due to the large volume.
+  - Dashboards visualize metrics to make monitoring accessible, though they require expertise to interpret correctly.
+  - Alerts notify relevant stakeholders of issues, but must be configured to avoid alert fatigue.
+
+**Observability**:
+  - Emphasizes the importance of setting up systems to infer internal states from external outputs.
+  - Includes the concept of telemetry (logs and metrics collected at runtime).
+  - Observability helps in understanding the complex behavior of ML systems, encompassing interpretability to diagnose issues without deploying new code.
+
+**Challenges in Monitoring**:
+  - Monitoring is not straightforward; understanding and interpreting metrics requires statistical knowledge.
+  - Detecting performance degradation is only the first step; adapting systems to changing environments is crucial.
 
