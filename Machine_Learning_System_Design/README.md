@@ -695,3 +695,5 @@ Continual learning involves updating a model periodically with new data. Unlike 
 
 Overall, combining offline and online evaluation methods, and using various deployment techniques such as shadow deployment, A/B testing, canary releases, interleaving experiments, and bandit algorithms, can ensure models are sufficiently evaluated and safely deployed.
 
+#### 10. Infrastructure and tooling for MLops
+
