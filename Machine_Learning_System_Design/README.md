@@ -598,3 +598,100 @@ Key concepts include:
   - Monitoring is not straightforward; understanding and interpreting metrics requires statistical knowledge.
   - Detecting performance degradation is only the first step; adapting systems to changing environments is crucial.
 
+
+#### 9. Continual Learning and Test in Production
+
+##### 9.1. Continual learning
+
+Continual learning involves updating a model periodically with new data. Unlike constant retraining with each incoming sample, which is rare due to the risk of catastrophic forgetting and high computational costs, continual learning typically uses micro-batches (e.g., updating after every 512 or 1,024 examples).
+
+**Model Update Process:**
+- Instead of updating the existing model directly, a replica (challenger) is created and updated. If this updated model performs better, it replaces the existing model (champion). Companies may use multiple challengers simultaneously.
+
+**Retraining Frequency:**
+- The frequency of model updates should be task-dependent, based on factors like data traffic and model decay rate. Many companies don't need very frequent updates (e.g., every 5 or 10 minutes) unless there's sufficient new data or the model decays rapidly.
+
+**Stateless vs. Stateful Training:**
+- **Stateless Retraining:** The model is retrained from scratch each time.
+- **Stateful Training:** The model continues training from its last state, requiring less data and computing power. Stateful training allows for updates with fresh data only and can reduce storage needs by not requiring permanent data storage.
+
+**Benefits of Stateful Training:**
+- Faster convergence and reduced compute costs.
+- Eliminates the need to store data permanently, alleviating privacy concerns.
+
+**Challenges and Best Practices:**
+- Infrastructure setup for continual learning should allow for both stateless and stateful retraining.
+- The training frequency should be optimized based on the specific needs and performance gains from fresher data.
+- Continual learning is essential for handling data distribution shifts and adapting to rare events, such as sudden surges in demand or special shopping events.
+
+**Examples of Use Cases:**
+- **Ride-sharing Pricing:** Quickly adapting to sudden changes in demand.
+- **E-commerce:** Adapting recommendations during events like Black Friday.
+- **Cold Start Problem:** Handling new users or infrequent visitors by quickly adapting recommendations based on their session behavior.
+
+**Continual Learning Challenges:**
+- **Fresh Data Access:** Ensuring timely access to new data, possibly through real-time data streams.
+- **Evaluation:** Thoroughly testing updates to avoid performance degradation and ensuring robustness against adversarial attacks.
+- **Algorithm Suitability:** Some algorithms (e.g., neural networks) adapt better to continual learning than others (e.g., matrix-based models).
+
+**Stages of Continual Learning:**
+1. **Manual, Stateless Retraining:** Initial stage with ad-hoc updates.
+2. **Automated Retraining:** Periodic updates using automated scripts.
+3. **Automated, Stateful Training:** Implementing stateful training to reduce retraining costs.
+4. **Continual Learning:** Dynamic updates triggered by data distribution shifts or performance changes.
+
+**Future of Continual Learning:**
+- As MLOps tooling matures, continual learning could become as straightforward as batch learning, enabling more adaptive and responsive machine learning models.
+
+**Conclusion:**
+- Continual learning enhances model performance by keeping them up-to-date with the latest data, addressing issues like data distribution shifts, rare events, and the cold start problem. It requires robust infrastructure, effective evaluation mechanisms, and the right balance between stateless and stateful training.
+
+##### 9.2. Test in production
+
+### Summary of Model Evaluation and Deployment Strategies
+
+**Model Evaluation Methods:**
+- **Test Splits:** Static benchmarks to compare multiple models, but they may not reflect new data distributions. 
+- **Backtests:** Evaluate models on recent data to reflect current distributions but should be supplemented with static test splits for reliability.
+
+**Deployment Techniques:**
+1. **Shadow Deployment:**
+   - Deploy the candidate model alongside the existing model.
+   - Route requests to both models but serve only the existing model's predictions.
+   - Log the new model's predictions for analysis.
+   - Advantage: Low risk as the new model's predictions are not served.
+   - Disadvantage: Doubles inference compute costs.
+
+2. **A/B Testing:**
+   - Compare the existing model with a candidate model by routing a percentage of traffic to each.
+   - Ensure randomized traffic routing and sufficient sample size.
+   - Measure statistical significance to determine which model performs better.
+   - Useful for determining the better model but requires careful design and execution.
+
+3. **Canary Release:**
+   - Gradually roll out the candidate model to a subset of users.
+   - Increase traffic to the candidate model if performance is satisfactory; otherwise, revert to the existing model.
+   - Can be used independently or in conjunction with A/B testing.
+
+4. **Interleaving Experiments:**
+   - Show recommendations from both models to users and measure which model’s recommendations are preferred.
+   - Effective for ranking algorithms with smaller sample sizes compared to A/B testing.
+   - Ensure equal probability for recommendations from each model to maintain validity.
+
+5. **Bandit Algorithms:**
+   - Balance between exploitation (using the best-performing model) and exploration (testing other models).
+   - More data-efficient and can quickly determine the best model with fewer samples.
+   - Examples: ε-greedy, Thompson Sampling, Upper Confidence Bound (UCB).
+
+**Challenges and Considerations:**
+- **Algorithm Suitability:** Bandits are more suitable for tasks with short feedback loops and online predictions.
+- **Implementation Complexity:** Bandits are harder to implement due to the need for real-time performance tracking and feedback mechanisms.
+- **Contextual Bandits:** Extend bandit algorithms to determine the payout of actions (e.g., ad recommendations) and balance exploration-exploitation trade-offs.
+  
+**Best Practices:**
+- **Automated Evaluation Pipelines:** Define clear evaluation pipelines to mitigate biases and ensure consistency. Automate these pipelines for continuous integration and deployment.
+- **Proper Sampling and Randomization:** Ensure A/B testing and other evaluation methods are properly randomized and have sufficient samples for valid results.
+- **Thorough Testing:** Evaluate models extensively before deployment to avoid failures and mitigate risks of adversarial attacks.
+
+Overall, combining offline and online evaluation methods, and using various deployment techniques such as shadow deployment, A/B testing, canary releases, interleaving experiments, and bandit algorithms, can ensure models are sufficiently evaluated and safely deployed.
+
