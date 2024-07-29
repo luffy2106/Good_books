@@ -471,7 +471,7 @@ The company faced expensive options to update the model or build an in-house tea
 - Deploying an ML model requires ongoing monitoring and updates to maintain performance.
 - Changes in data patterns over time can cause models to fail, highlighting the need for regular updates.
 
-##### 8.1. Causes of ML System Failures
+##### 8.1. Causes of ML System FailuresData
 
 - Failure: Occurs when one or more system expectations are violated.
 - Operational Expectations: Similar to traditional software, focusing on metrics like latency and throughput.
@@ -696,4 +696,275 @@ Continual learning involves updating a model periodically with new data. Unlike 
 Overall, combining offline and online evaluation methods, and using various deployment techniques such as shadow deployment, A/B testing, canary releases, interleaving experiments, and bandit algorithms, can ensure models are sufficiently evaluated and safely deployed.
 
 #### 10. Infrastructure and tooling for MLops
+
+##### 10.1 Development Environment
+
+The development environment for machine learning (ML) engineers consists of the Integrated Development Environment (IDE), versioning tools, and Continuous Integration/Continuous Deployment (CI/CD) systems. Despite its importance, the dev environment is often underrated in many companies, leading to ad-hoc solutions for code development, debugging, and testing.
+
+- **IDE**: Tools like VS Code, Vim, and browser-based IDEs such as AWS Cloud9 are commonly used. Data scientists also heavily utilize notebooks like Jupyter and Google Colab for their exploratory capabilities.
+- **Versioning**: Tools like Git, DVC, Weights & Biases, Comet.ml, and MLflow are used for versioning code, data, and model artifacts.
+- **CI/CD**: GitHub Actions and CircleCI are examples of tools used to automate testing and deployment processes.
+
+#### Importance of Standardizing Dev Environments
+Standardizing the development environment, either company-wide or team-wide, can significantly improve engineering productivity and consistency. The text describes challenges faced when using inconsistent development setups and the eventual move to cloud-based environments for standardization.
+
+- **Local vs. Cloud**: Moving to cloud dev environments simplifies IT support, enhances remote work capabilities, and improves security.
+- **Cloud IDEs**: Tools like GitHub Codespaces and AWS EC2 instances are used to provide standardized cloud environments.
+
+#### Transition to Production with Containers
+Containers, particularly Docker, are used to ensure that code runs consistently across different environments by packaging the application along with its dependencies. This is crucial for moving from development to production where workloads can be dynamic.
+
+- **Docker**: Containers are created from Docker images, which are defined by Dockerfiles. These images ensure that the environment setup is consistent and replicable across multiple instances.
+- **Container Orchestration**: Kubernetes (K8s) is used for managing large numbers of containers across different hosts, providing features like autoscaling, load balancing, and high availability.
+
+#### Example of Docker Usage
+An example Dockerfile is provided, illustrating the steps to create a Docker image for a project involving PyTorch and Hugging Face's transformers library.
+
+```yaml
+FROM pytorch/pytorch:latest
+RUN git clone https://github.com/NVIDIA/apex
+RUN cd apex && \
+    python3 setup.py install && \
+    pip install -v --no-cache-dir --global-option="--cpp_ext" \
+    --global-option="--cuda_ext" ./
+WORKDIR /fancy-nlp-project
+RUN git clone https://github.com/huggingface/transformers.git && \
+    cd transformers && \
+    python3 -m pip install --no-cache-dir .
+```
+
+This file shows how to set up the environment by installing necessary packages and setting up directories.
+
+#### Multi-Container and Orchestration
+For complex applications requiring multiple containers, container orchestration tools like Docker Compose (for single host) and Kubernetes (for multiple hosts) are essential. These tools manage the lifecycle of containers, ensuring they are correctly deployed, scaled, and maintained.
+
+- **Kubernetes (K8s)**: Offers advanced features for managing containerized applications across clusters, maintaining service availability, and optimizing resource usage.
+
+By leveraging these tools and practices, organizations can create robust, scalable, and maintainable ML systems, bridging the gap between development and production environments effectively.
+
+##### 10.2 Resource management
+
+
+**Pre-Cloud vs. Cloud Resource Management**
+- **Pre-Cloud**: Resource management involved maximizing limited compute and storage resources within data centers, often requiring complex logic and significant engineering time.
+- **Cloud**: Resources are elastic, shifting focus to cost-effective usage. Companies prefer investing in automation to free up engineers for higher-value tasks, even if it results in less efficient resource usage.
+
+**Characteristics of ML Workflows**
+- **Repetitiveness**: ML workflows often involve repetitive tasks, such as regular model training or batch predictions.
+- **Dependencies**: ML workflow steps often depend on the success of previous steps, forming complex dependency relationships.
+
+**Scheduling and Orchestration**
+- **Cron Jobs**: Used for scheduling repetitive tasks at fixed times, but lacks handling of dependencies.
+- **Schedulers**: Advanced cron-like systems that manage dependencies and resources, often represented as Directed Acyclic Graphs (DAGs).
+- **Orchestrators**: Manage where resources come from and ensure the necessary compute resources are available, often integrating with schedulers.
+
+Example of a Scheduler: Slurm
+```bash
+#!/bin/bash
+#SBATCH -J JobName
+#SBATCH --time=11:00:00 # When to start the job
+#SBATCH --mem-per-cpu=4096 # Memory, in MB, to be allocated per CPU
+#SBATCH --cpus-per-task=4 # Number of cores per task
+```
+
+**Workflow Management Tools**
+- **Airflow**: Early task scheduler with many operators but suffers from monolithic design and static, non-parameterized DAGs.
+- **Prefect**: Dynamic and parameterized workflows, addressing many drawbacks of Airflow but with less focus on containerization.
+- **Argo**: Emphasizes containerized steps with YAML-defined workflows but requires Kubernetes, making local testing challenging.
+- **Kubeflow and Metaflow**: Abstract away infrastructure complexities, enabling seamless dev and prod workflows. Kubeflow relies on Argo and Kubernetes, while Metaflow simplifies the process with Python decorators.
+
+**Key Takeaways**
+- **Schedulers and Orchestrators**: Essential for managing repetitive and dependent ML tasks, optimizing resource utilization, and ensuring smooth execution.
+- **Workflow Management Tools**: Provide advanced capabilities for defining, scheduling, and orchestrating ML workflows, with varying degrees of complexity and ease of use.
+- **Cloud Dev Environments**: Offer significant benefits in standardization, IT support, remote work capabilities, and bridging the gap between development and production environments. 
+
+By leveraging these tools and principles, organizations can effectively manage resources, automate workflows, and improve the productivity of their ML engineering teams.
+
+##### 10.3 ML Platform
+
+**Introduction**:
+   - An ML platform is essential for deploying ML applications efficiently.
+   - Initial focus often on specific applications like recommender systems, but these tools can be generalized for broader ML use.
+
+**Components**:
+   - **Model Development**: Tools for creating and training models.
+   - **Model Store**: Centralized storage for model artifacts.
+   - **Feature Store**: Manages and serves features used by models.
+
+**Key Considerations**:
+   - **Cloud Provider Compatibility**: Ensures integration with existing cloud infrastructure.
+   - **Open Source vs. Managed Services**: Balance between control and maintenance overhead versus convenience and compliance.
+
+*Model Deployment*
+
+1. **Purpose**:
+   - Making trained models accessible to users through endpoints.
+   - Supports both online and batch predictions.
+
+2. **Tools**:
+   - Major cloud providers like AWS, GCP, Azure offer deployment tools.
+   - Startups also provide specialized deployment tools like MLflow, Seldon, and Ray Serve.
+
+3. **Challenges**:
+   - Ensuring model quality before deployment using techniques like shadow deployment, canary release, and A/B testing.
+
+*Model Store*
+
+1. **Importance**:
+   - Stores models and associated artifacts for easier debugging and maintenance.
+
+2. **Artifacts to Store**:
+   - Model definition, parameters, featurize and predict functions, dependencies, data, model generation code, experiment artifacts, tags.
+
+3. **Challenges**:
+   - Need for comprehensive storage solutions that include various artifacts for effective model management.
+   - Existing solutions like MLflow are popular but have limitations in handling artifacts efficiently.
+
+*Feature Store*
+
+1. **Purpose**:
+   - Addresses feature management, computation, and consistency across ML models.
+
+2. **Key Functions**:
+   - **Feature Management**: Sharing and discovering features across models.
+   - **Feature Computation**: Efficiently computing and storing features.
+   - **Feature Consistency**: Ensuring features are consistent between training and inference.
+
+3. **Current Landscape**:
+   - Feature stores are a newer category with varying capacities among different vendors.
+   - Popular solutions include Feast (focus on batch features) and Tecton (handles both batch and online features).
+
+By implementing a comprehensive ML platform with robust model and feature stores, organizations can streamline their ML workflows, ensure consistency, and maintain high-quality deployments.
+
+##### 10.4 Build Versus Buy
+
+*Infrastructure for ML Needs*
+
+1. **Infrastructure Requirements**:
+   - Vary based on application type and scale.
+   - Investment depends on whether infrastructure is built in-house or outsourced.
+
+2. **Outsourcing vs. In-House**:
+   - **Outsourcing**: Minimal infrastructure needed, mainly for data movement.
+   - **In-House**: Requires extensive infrastructure and possibly even data centers.
+
+3. **Hybrid Approach**:
+   - Most companies use a mix of in-house and outsourced components.
+   - Common setup: managed compute by AWS EC2, data warehouse by Snowflake, in-house feature store, and monitoring dashboards.
+
+*Factors in Build vs. Buy Decisions*
+
+1. **Company Stage**:
+   - Early stages: Use vendor solutions for quick setup.
+   - Growth stages: Shift to in-house solutions as vendor costs become prohibitive.
+
+2. **Focus and Competitive Advantage**:
+   - Companies prioritize building in-house for core competencies.
+   - Non-tech companies often prefer managed services.
+   - Tech companies may prefer modular, customizable services for better control.
+
+3. **Maturity of Available Tools**:
+   - Early adopters build their own infrastructure due to lack of mature solutions.
+   - Mature solutions face challenges integrating with custom infrastructures of large tech companies.
+   - Advisement against selling to big tech due to "integration hell," focusing on startups instead.
+
+*Cost Considerations*
+
+1. **Misconceptions About Costs**:
+   - Building is not always cheaper than buying.
+   - Building requires hiring more engineers and may limit future innovation due to integration issues.
+
+2. **Complexity of Decisions**:
+   - Build vs. buy decisions are complex and context-dependent.
+   - Importance of vendor/product selection is growing rapidly in the fast-evolving infrastructure space.
+
+#### 11. Infrastructure and tooling for MLops
+
+##### 11.1 User experience
+
+
+*User Experience with ML Systems*
+
+1. **Differences from Traditional Software**:
+   - ML systems are probabilistic, meaning the same input can yield different results at different times.
+   - ML predictions are mostly correct but not always, making it hard to predict when they will be accurate.
+   - ML systems can be large and slow, impacting prediction times.
+
+2. **Challenges and Solutions**:
+   - **Consistency in User Experience**:
+     - Users expect consistent behavior from applications.
+     - Inconsistency in ML predictions can confuse users.
+     - Example: Booking.com used rules to ensure filter recommendations remain consistent under certain conditions to balance accuracy and consistency.
+   - **Combatting “Mostly Correct” Predictions**:
+     - Large language models like GPT-3 provide mostly correct but sometimes inaccurate predictions.
+     - For some tasks, showing multiple predictions can help users find correct ones.
+     - This approach, called "human-in-the-loop" AI, involves humans refining or selecting from AI-generated predictions.
+   - **Smooth Failing**:
+     - ML models can have variable inference times, especially with complex queries.
+     - Companies use backup systems with simpler models or precomputed predictions for quick responses when main models are slow.
+     - This addresses the speed-accuracy trade-off, ensuring timely responses even if accuracy is slightly compromised.
+
+*Detailed Points*
+
+1. **Ensuring User Experience Consistency**:
+   - Users are accustomed to consistent interfaces and functionalities.
+   - ML predictions’ variability can disrupt this consistency.
+   - Solutions involve setting rules for when to provide consistent versus new predictions, as illustrated by Booking.com's filter recommendation system.
+
+2. **Combatting “Mostly Correct” Predictions**:
+   - Large language models are versatile but not always accurate.
+   - Fine-tuning for specific tasks is costly.
+   - Showing multiple predictions and allowing users to choose or refine them increases utility, especially for non-expert users.
+
+3. **Smooth Failing**:
+   - Handling variable inference times involves backup systems.
+   - These systems use simpler models or cached results for quick responses.
+   - Backup models can be triggered by rules or additional models predicting main model latency, addressing the need for fast responses in user-critical scenarios.
+
+##### 11.2 Team structure
+
+**Cross-functional Teams Collaboration**:
+   - ML projects involve diverse stakeholders: data scientists, ML engineers, DevOps engineers, platform engineers, and subject matter experts (SMEs).
+   - **Role of SMEs**:
+     - Integral for the entire ML lifecycle, not just data labeling.
+     - Involved in problem formulation, feature engineering, error analysis, model evaluation, reranking predictions, and user interface design.
+   - **Challenges**:
+     - Communicating ML limitations to non-engineering SMEs.
+     - Versioning domain expertise into code.
+     - Involving SMEs early and using no-code/low-code platforms for SME contributions.
+
+**End-to-End Data Scientists**:
+   - ML production requires both ML and operational expertise (deployment, containerization, job orchestration, workflow management).
+   - Companies use two main approaches to integrate these skills:
+
+**Approach 1: Separate Teams for Development and Production**:
+   - Data science team develops models; Ops/platform team productionizes them.
+   - **Advantages**:
+     - Easier hiring due to specialized skill sets.
+     - Simplifies focus for individuals.
+   - **Drawbacks**:
+     - Communication and coordination overhead.
+     - Debugging challenges and potential for finger-pointing.
+     - Limited visibility into the entire process, reducing optimization opportunities.
+
+**Approach 2: Data Scientists Own the Entire Process**:
+   - Data scientists manage both development and production.
+   - **Advantages**:
+     - End-to-end ownership can streamline processes.
+   - **Drawbacks**:
+     - Requires a wide range of skills, making it challenging for data scientists.
+     - Risk of spending more time on infrastructure tasks than data science.
+
+**Importance of Tools**:
+   - Effective tools can help data scientists manage the end-to-end process without deep infrastructure knowledge.
+   - **Example**: Tools that manage infrastructure details (e.g., data storage, dependencies, code execution) can help data scientists focus on ML tasks.
+
+**Full-Stack Data Scientists**:
+   - The success of full-stack data scientists depends on tools that abstract complex infrastructure tasks.
+   - **Netflix's Model**: Specialists create tools that automate parts of the process, enabling data scientists to manage projects end-to-end.
+
+**Key Considerations**:
+   - Good tools and infrastructure are crucial for efficient ML projects.
+   - Organizational structure impacts productivity and effectiveness in ML projects.
+   - The balance between specialized teams and end-to-end ownership is context-dependent.
 
