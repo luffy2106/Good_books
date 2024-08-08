@@ -343,12 +343,67 @@ Overall, the text emphasizes the critical role of data labeling in ML, the chall
 
 
 ##### 4.3 Class imbalance
-[to be continued ]
 
+Class imbalance occurs when the number of samples in each class of training data is significantly different. For instance, in a lung cancer detection dataset, 99.99% of X-rays might be normal, while only 0.01% show cancerous cells. This imbalance can also occur in regression tasks, such as predicting healthcare bills, where extreme values are rare but significant.
 
+**Challenges**
+1. Insufficient Signal: Models may not learn to detect minority classes due to the limited number of examples, leading to few-shot learning problems or models that assume rare classes don't exist.
+2. Nonoptimal Solutions: Models might exploit simple heuristics (e.g., always predicting the majority class), which gradient descent algorithms struggle to beat.
+3. Asymmetric Costs: Errors on rare class samples often have higher costs than errors on majority class samples, making it critical to adjust loss functions accordingly.
+**Handling Class Imbalance**
+1. Choosing the Right Metrics:
+- Accuracy and error rate are insufficient for imbalanced data as they favor the majority class.
+- Metrics like precision, recall, F1 score, and area under the ROC curve are better suited to evaluate performance on imbalanced datasets.
+2. Data-Level Methods (Resampling):
+- Oversampling: Adding more instances of minority classes.
+- Undersampling: Removing instances of majority classes.
+- Techniques like SMOTE (Synthetic Minority Oversampling Technique) and Tomek links help balance the data but may have limitations in high-dimensional data.
+3. Algorithm-Level Methods:
+- Cost-Sensitive Learning: Adjusts the loss function to account for different misclassification costs.
+- Class-Balanced Loss: Weights each class inversely proportional to its frequency, punishing the model more for errors on minority classes.
+- Focal Loss: Focuses on hard-to-classify samples by increasing their weight in the loss function.
+**Real-World Applications**
+Class imbalance is common in real-world scenarios such as fraud detection, churn prediction, disease screening, and object detection. Handling class imbalance effectively is crucial for building robust machine learning systems that perform well on both majority and minority classes.
+
+##### 4.4 Data augmentation
+
+Data augmentation is a set of techniques used to increase the amount of training data by creating new samples from existing ones. Initially used for tasks with limited data, like medical imaging, these techniques have proven beneficial even with large datasets, enhancing model robustness to noise and adversarial attacks.
+
+**Types of Data Augmentation**
+1. Simple Label-Preserving Transformations:
+- Computer Vision: Techniques include cropping, flipping, rotating, inverting, and erasing parts of images. These transformations maintain the original labels (e.g., a rotated image of a dog is still labeled as a dog). This method effectively doubles or triples the training data.
+- NLP: Involves replacing words with synonyms to preserve the sentence's meaning or sentiment. For example, "I’m so happy to see you" can be transformed into "I’m so glad to see you" or "I’m very happy to see you" using dictionaries or word embeddings.
+2. Perturbation:
+- Computer Vision: Adding noise to images can help models recognize weak spots in their decision boundaries, improving performance. Techniques include random noise addition or adversarial augmentation (e.g., changing one pixel to misclassify an image).
+- NLP: Less common, but can involve replacing random words to improve robustness. For instance, in BERT, 15% of tokens are randomly replaced to create noise, slightly boosting model performance.
+3. Data Synthesis:
+- NLP: Templates are used to generate training data. For example, the template "Find me a [CUISINE] restaurant within [NUMBER] miles of [LOCATION]" can create numerous queries by filling in the placeholders.
+- Computer Vision: Techniques like mixup combine existing examples to create new ones with continuous labels, improving model generalization and robustness. Neural networks can also generate training data, as seen in CycleGAN applications, which have enhanced performance in tasks like CT segmentation.
 
 #### 5. Feature engineering
-[to be continued ]
+
+##### 5.1 Learned Features Versus Engineered Features
+
+**Importance and Current Status**
+Feature engineering remains a critical aspect of machine learning, despite the advancements in deep learning. While deep learning, often termed feature learning, promises to reduce the need for handcrafted features by automatically learning and extracting many features, we are not yet at a point where all features can be automated. Moreover, many current ML applications in production do not utilize deep learning.
+
+**Example: Sentiment Analysis Classifier**
+- Before Deep Learning: Manual application of text processing techniques like lemmatization, expanding contractions, removing punctuation, lowercasing, and splitting text into n-grams.
+  * N-grams: Contiguous sequences of n items from text (e.g., words or syllables). For "I like food", 1-grams are ["I", "like", "food"], and 2-grams are ["I like", "like food"].
+  * Feature Vector Creation: Mapping n-grams to indices to create vectors representing each post, which are then used as inputs to ML models.
+- Challenges: The iterative and brittle nature of this process often required restarting due to forgotten techniques or poorly performing techniques.
+**Deep Learning Advancements**
+- Text Processing: Instead of complex preprocessing, raw text is tokenized into words, creating a vocabulary and converting words into one-shot vectors. The model learns to extract useful features.
+- Image Processing: Similar progress allows direct input of raw images into deep learning models, eliminating the need for manual feature extraction.
+**Beyond Text and Images**
+- Additional Data: For tasks like spam detection, additional information beyond text may be needed, such as:
+  * Comment Metrics: Upvotes/downvotes.
+  * User Metrics: Account age, posting frequency, and upvote/downvote history.
+  * Thread Metrics: Views, with popular threads attracting more spam.
+- Feature Engineering Process: Involves selecting relevant information and converting it into a usable format for ML models. This can include millions of features for complex tasks like video recommendation systems on platforms like TikTok. Domain-specific tasks, like fraud detection, require subject matter expertise to identify useful features
+
+##### 5.2 Common Feature Engineering Operations
+
 
 #### 6. Model Development and Offline Evaluation
 [to be continued ]
